@@ -828,6 +828,7 @@ where
                                 PointerKind::UniqueBorrowedPinned
                             }
                         }
+                        hir::Mutability::SharedMut => PointerKind::SharedMutable,
                     }
                 };
 

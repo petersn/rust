@@ -279,7 +279,8 @@ impl<'tcx> Ty<'tcx> {
             ty::Slice(_) => "slice".into(),
             ty::RawPtr(tymut) => {
                 let tymut_string = match tymut.mutbl {
-                    hir::Mutability::Mut => tymut.to_string(),
+                    // [snp] I think this is the right change, because I don't need a *shrmut pointer type.
+                    hir::Mutability::Mut | hir::Mutability::SharedMut => tymut.to_string(),
                     hir::Mutability::Not => format!("const {}", tymut.ty),
                 };
 

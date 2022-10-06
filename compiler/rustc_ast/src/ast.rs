@@ -679,6 +679,8 @@ impl BindingAnnotation {
     pub const REF: Self = Self(ByRef::Yes, Mutability::Not);
     pub const MUT: Self = Self(ByRef::No, Mutability::Mut);
     pub const REF_MUT: Self = Self(ByRef::Yes, Mutability::Mut);
+    pub const SHRMUT: Self = Self(ByRef::No, Mutability::SharedMut);
+    pub const REF_SHRMUT: Self = Self(ByRef::Yes, Mutability::SharedMut);
 
     pub fn prefix_str(self) -> &'static str {
         match self {
@@ -686,6 +688,8 @@ impl BindingAnnotation {
             Self::REF => "ref ",
             Self::MUT => "mut ",
             Self::REF_MUT => "ref mut ",
+            Self::SHRMUT => "shrmut ",
+            Self::REF_SHRMUT => "ref shrmut ",
         }
     }
 }
@@ -779,12 +783,14 @@ pub enum PatKind {
 pub enum Mutability {
     Mut,
     Not,
+    SharedMut,
 }
 
 impl Mutability {
+    // [snp] I am suspicious of this method!
     pub fn invert(self) -> Self {
         match self {
-            Mutability::Mut => Mutability::Not,
+            Mutability::SharedMut | Mutability::Mut => Mutability::Not,
             Mutability::Not => Mutability::Mut,
         }
     }
@@ -792,6 +798,7 @@ impl Mutability {
     pub fn prefix_str(&self) -> &'static str {
         match self {
             Mutability::Mut => "mut ",
+            Mutability::SharedMut => "shrmut ",
             Mutability::Not => "",
         }
     }

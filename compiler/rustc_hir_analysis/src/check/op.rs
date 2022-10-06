@@ -265,6 +265,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     if let ty::Ref(region, _, mutbl) = method.sig.inputs()[0].kind() {
                         let mutbl = match mutbl {
                             hir::Mutability::Not => AutoBorrowMutability::Not,
+                            hir::Mutability::SharedMut => AutoBorrowMutability::SharedMut,
                             hir::Mutability::Mut => AutoBorrowMutability::Mut {
                                 // Allow two-phase borrows for binops in initial deployment
                                 // since they desugar to methods
@@ -282,6 +283,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     if let ty::Ref(region, _, mutbl) = method.sig.inputs()[1].kind() {
                         let mutbl = match mutbl {
                             hir::Mutability::Not => AutoBorrowMutability::Not,
+                            hir::Mutability::SharedMut => AutoBorrowMutability::SharedMut,
                             hir::Mutability::Mut => AutoBorrowMutability::Mut {
                                 // Allow two-phase borrows for binops in initial deployment
                                 // since they desugar to methods

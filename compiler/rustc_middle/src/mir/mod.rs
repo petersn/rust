@@ -1854,6 +1854,7 @@ impl BorrowKind {
         match *self {
             BorrowKind::Shared | BorrowKind::Shallow | BorrowKind::Unique => false,
             BorrowKind::Mut { allow_two_phase_borrow } => allow_two_phase_borrow,
+            BorrowKind::SharedMut => false,
         }
     }
 
@@ -1861,6 +1862,7 @@ impl BorrowKind {
         match *self {
             BorrowKind::Shared | BorrowKind::Shallow | BorrowKind::Unique => "immutable",
             BorrowKind::Mut { .. } => "mutable",
+            BorrowKind::SharedMut => "shared mutable",
         }
     }
 }
@@ -1903,6 +1905,7 @@ impl<'tcx> Debug for Rvalue<'tcx> {
                     BorrowKind::Shared => "",
                     BorrowKind::Shallow => "shallow ",
                     BorrowKind::Mut { .. } | BorrowKind::Unique => "mut ",
+                    BorrowKind::SharedMut => "shrmut ",
                 };
 
                 // When printing regions, add trailing space if necessary.
@@ -1927,6 +1930,7 @@ impl<'tcx> Debug for Rvalue<'tcx> {
             AddressOf(mutability, ref place) => {
                 let kind_str = match mutability {
                     Mutability::Mut => "mut",
+                    Mutability::SharedMut => "shrmut",
                     Mutability::Not => "const",
                 };
 

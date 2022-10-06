@@ -307,7 +307,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 let arg = &this.thir[arg];
                 let place = match mutability {
                     hir::Mutability::Not => this.as_read_only_place(block, arg),
-                    hir::Mutability::Mut => this.as_place(block, arg),
+                    hir::Mutability::SharedMut | hir::Mutability::Mut => this.as_place(block, arg),
                 };
                 let address_of = Rvalue::AddressOf(mutability, unpack!(block = place));
                 this.cfg.push_assign(block, source_info, destination, address_of);

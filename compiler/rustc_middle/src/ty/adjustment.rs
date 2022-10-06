@@ -122,6 +122,7 @@ impl<'tcx> OverloadedDeref<'tcx> {
         let trait_def_id = match self.mutbl {
             hir::Mutability::Not => tcx.require_lang_item(LangItem::Deref, None),
             hir::Mutability::Mut => tcx.require_lang_item(LangItem::DerefMut, None),
+            hir::Mutability::SharedMut => tcx.require_lang_item(LangItem::DerefShrMut, None),
         };
         let method_def_id = tcx
             .associated_items(trait_def_id)
@@ -155,6 +156,7 @@ pub enum AllowTwoPhase {
 pub enum AutoBorrowMutability {
     Mut { allow_two_phase_borrow: AllowTwoPhase },
     Not,
+    SharedMut,
 }
 
 impl From<AutoBorrowMutability> for hir::Mutability {
@@ -162,6 +164,7 @@ impl From<AutoBorrowMutability> for hir::Mutability {
         match m {
             AutoBorrowMutability::Mut { .. } => hir::Mutability::Mut,
             AutoBorrowMutability::Not => hir::Mutability::Not,
+            AutoBorrowMutability::SharedMut => hir::Mutability::SharedMut,
         }
     }
 }

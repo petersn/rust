@@ -1033,6 +1033,7 @@ fn fmt_type<'cx>(
             let m = match m {
                 hir::Mutability::Mut => "mut",
                 hir::Mutability::Not => "const",
+                hir::Mutability::SharedMut => "shrmut",
             };
 
             if matches!(**t, clean::Generic(_)) || t.is_assoc_ty() {
@@ -1529,6 +1530,7 @@ impl PrintWithSpace for hir::Mutability {
         match self {
             hir::Mutability::Not => "",
             hir::Mutability::Mut => "mut ",
+            hir::Mutability::SharedMut => "shrmut ",
         }
     }
 }

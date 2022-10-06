@@ -165,7 +165,8 @@ pub enum Needs {
 impl Needs {
     fn maybe_mut_place(m: hir::Mutability) -> Self {
         match m {
-            hir::Mutability::Mut => Needs::MutPlace,
+            // [snp] Is sharing functionality here right?
+            hir::Mutability::Mut | hir::Mutability::SharedMut => Needs::MutPlace,
             hir::Mutability::Not => Needs::None,
         }
     }

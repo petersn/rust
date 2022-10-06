@@ -782,6 +782,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     hir::Mutability::Not => {
                         self.tcx.mk_imm_ref(self.tcx.mk_region(ty::ReStatic), checked_ty)
                     }
+                    hir::Mutability::SharedMut => {
+                        self.tcx.mk_shrmut_ref(self.tcx.mk_region(ty::ReStatic), checked_ty)
+                    }
                 };
                 if self.can_coerce(ref_ty, expected) {
                     let mut sugg_sp = sp;
@@ -853,6 +856,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 Applicability::MachineApplicable,
                                 false,
                             ),
+                            hir::Mutability::SharedMut => (
+                                sp,
+                                "consider shrmut borrowing here".to_string(),
+                                format!("{prefix}&{sugg_expr}"),
+                                Applicability::MachineApplicable,
+                                false,
+                            ),
                         });
                     }
                 }
@@ -920,6 +930,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                         (sp, derefs, Applicability::MachineApplicable)
                                     })
                                 }
+                                hir::Mutability::SharedMut => {
+                                    replace_prefix(&src, "&shrmut ", &new_prefix).map(|_| {
+                                        let pos = sp.lo() + BytePos(8);
+                                        let sp = sp.with_lo(pos).with_hi(pos);
+                                        (sp, derefs, Applicability::MachineApplicable)
+                                    })
+                                }
                                 hir::Mutability::Not => {
                                     replace_prefix(&src, "&", &new_prefix).map(|_| {
                                         let pos = sp.lo() + BytePos(1);
@@ -933,6 +950,36 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 }
                             }
                         }
+                        hir::Mutability::SharedMut => {
+                            let new_prefix = "&shrmut ".to_owned() + &derefs;
+                            match mutbl_a {
+                                hir::Mutability::Mut => {
+                                    replace_prefix(&src, "&mut ", &new_prefix).map(|_| {
+                                        let pos = sp.lo() + BytePos(5);
+                                        let sp = sp.with_lo(pos).with_hi(pos);
+                                        (sp, derefs, Applicability::MachineApplicable)
+                                    })
+                                }
+                                hir::Mutability::SharedMut => {
+                                    replace_prefix(&src, "&shrmut ", &new_prefix).map(|_| {
+                                        let pos = sp.lo() + BytePos(8);
+                                        let sp = sp.with_lo(pos).with_hi(pos);
+                                        (sp, derefs, Applicability::MachineApplicable)
+                                    })
+                                }
+                                hir::Mutability::Not => {
+                                    replace_prefix(&src, "&", &new_prefix).map(|_| {
+                                        let pos = sp.lo() + BytePos(1);
+                                        let sp = sp.with_lo(pos).with_hi(pos);
+                                        (
+                                            sp,
+                                            format!("shrmut {derefs}"),
+                                            Applicability::Unspecified,
+                                        )
+                                    })
+                                }
+                            }
+                        }
                         hir::Mutability::Not => {
                             let new_prefix = "&".to_owned() + &derefs;
                             match mutbl_a {
@@ -940,6 +987,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                     replace_prefix(&src, "&mut ", &new_prefix).map(|_| {
                                         let lo = sp.lo() + BytePos(1);
                                         let hi = sp.lo() + BytePos(5);
+                                        let sp = sp.with_lo(lo).with_hi(hi);
+                                        (sp, derefs, Applicability::MachineApplicable)
+                                    })
+                                }
+                                hir::Mutability::SharedMut => {
+                                    replace_prefix(&src, "&shrmut ", &new_prefix).map(|_| {
+                                        let lo = sp.lo() + BytePos(1);
+                                        let hi = sp.lo() + BytePos(8);
                                         let sp = sp.with_lo(lo).with_hi(hi);
                                         (sp, derefs, Applicability::MachineApplicable)
                                     })
@@ -979,6 +1034,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             remove += match mutbl {
                                 hir::Mutability::Not => "&",
                                 hir::Mutability::Mut => "&mut ",
+                                hir::Mutability::SharedMut => "&shrmut ",
                             };
                             steps -= 1;
                         } else {

@@ -2486,6 +2486,9 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                                     // the borrow.
                                     break;
                                 }
+                                hir::Mutability::SharedMut => {
+                                    println!("[snp] I have no idea what to do here");
+                                }
                                 hir::Mutability::Mut => {
                                     // Mutable reference. We *do* need the base
                                     // to be valid, because after the base becomes

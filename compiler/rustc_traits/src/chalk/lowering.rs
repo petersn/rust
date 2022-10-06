@@ -781,6 +781,8 @@ impl<'tcx> LowerInto<'tcx, chalk_solve::rust_ir::TraitBound<RustInterner<'tcx>>>
 impl<'tcx> LowerInto<'tcx, chalk_ir::Mutability> for ast::Mutability {
     fn lower_into(self, _interner: RustInterner<'tcx>) -> chalk_ir::Mutability {
         match self {
+            // [snp] -- Once I get chalk modified, change this.
+            rustc_ast::Mutability::SharedMut => chalk_ir::Mutability::Mut,
             rustc_ast::Mutability::Mut => chalk_ir::Mutability::Mut,
             rustc_ast::Mutability::Not => chalk_ir::Mutability::Not,
         }

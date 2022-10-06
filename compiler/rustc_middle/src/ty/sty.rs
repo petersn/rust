@@ -2227,6 +2227,9 @@ impl<'tcx> Ty<'tcx> {
             // anything with custom metadata it might be more complicated.
             ty::Ref(_, _, hir::Mutability::Not) | ty::RawPtr(..) => false,
 
+            // Shared mut references follow the same rules as shared references.
+            ty::Ref(_, _, hir::Mutability::SharedMut) => false,
+
             ty::Generator(..) | ty::GeneratorWitness(..) => false,
 
             // Might be, but not "trivial" so just giving the safe answer.

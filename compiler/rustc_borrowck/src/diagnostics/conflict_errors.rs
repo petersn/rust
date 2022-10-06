@@ -776,6 +776,8 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         // FIXME: supply non-"" `opt_via` when appropriate
         let first_borrow_desc;
         let mut err = match (gen_borrow_kind, issued_borrow.kind) {
+            (BorrowKind::SharedMut, _) => panic!("[snp] Unsure what to do here!"),
+            (_, BorrowKind::SharedMut) => panic!("[snp] Unsure what to do here!"),
             (BorrowKind::Shared, BorrowKind::Mut { .. }) => {
                 first_borrow_desc = "mutable ";
                 self.cannot_reborrow_already_borrowed(

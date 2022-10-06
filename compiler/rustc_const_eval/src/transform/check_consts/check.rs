@@ -421,6 +421,10 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                         BorrowKind::Mut { .. } => {
                             PlaceContext::MutatingUse(MutatingUseContext::Borrow)
                         }
+                        // [snp] Do I need MutatingUseContext::SharedBorrow?
+                        BorrowKind::SharedMut => {
+                            PlaceContext::MutatingUse(MutatingUseContext::Borrow)
+                        }
                     };
                     self.visit_local(reborrowed_place_ref.local, ctx, location);
                     self.visit_projection(reborrowed_place_ref, ctx, location);
@@ -433,7 +437,8 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                         Mutability::Not => {
                             PlaceContext::NonMutatingUse(NonMutatingUseContext::AddressOf)
                         }
-                        Mutability::Mut => PlaceContext::MutatingUse(MutatingUseContext::AddressOf),
+                        // [snp] Should this be shared?
+                        Mutability::Mut | Mutability::SharedMut => PlaceContext::MutatingUse(MutatingUseContext::AddressOf),
                     };
                     self.visit_local(reborrowed_place_ref.local, ctx, location);
                     self.visit_projection(reborrowed_place_ref, ctx, location);
@@ -456,6 +461,7 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
             | Rvalue::Aggregate(..) => {}
 
             Rvalue::Ref(_, kind @ BorrowKind::Mut { .. }, ref place)
+            | Rvalue::Ref(_, kind @ BorrowKind::SharedMut, ref place)
             | Rvalue::Ref(_, kind @ BorrowKind::Unique, ref place) => {
                 let ty = place.ty(self.body, self.tcx).ty;
                 let is_allowed = match ty.kind() {
@@ -485,7 +491,8 @@ impl<'tcx> Visitor<'tcx> for Checker<'_, 'tcx> {
                 }
             }
 
-            Rvalue::AddressOf(Mutability::Mut, ref place) => {
+            // [snp] Should I share this functionality here?
+            Rvalue::AddressOf(Mutability::Mut | Mutability::SharedMut, ref place) => {
                 self.check_mut_borrow(place.local, hir::BorrowKind::Raw)
             }
 

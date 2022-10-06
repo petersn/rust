@@ -1580,6 +1580,7 @@ impl ConstContext {
         match self {
             Self::Const => "const",
             Self::Static(Mutability::Not) => "static",
+            Self::Static(Mutability::SharedMut) => "static shrmut",
             Self::Static(Mutability::Mut) => "static mut",
             Self::ConstFn => "const fn",
         }

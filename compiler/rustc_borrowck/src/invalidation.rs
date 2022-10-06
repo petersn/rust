@@ -257,6 +257,7 @@ impl<'cx, 'tcx> InvalidationGenerator<'cx, 'tcx> {
                         (Shallow(Some(ArtificialField::ShallowBorrow)), Read(ReadKind::Borrow(bk)))
                     }
                     BorrowKind::Shared => (Deep, Read(ReadKind::Borrow(bk))),
+                    BorrowKind::SharedMut => (Deep, Write(WriteKind::MutableBorrow(bk))),
                     BorrowKind::Unique | BorrowKind::Mut { .. } => {
                         let wk = WriteKind::MutableBorrow(bk);
                         if allow_two_phase_borrow(bk) {
@@ -272,6 +273,10 @@ impl<'cx, 'tcx> InvalidationGenerator<'cx, 'tcx> {
 
             Rvalue::AddressOf(mutability, place) => {
                 let access_kind = match mutability {
+                    Mutability::SharedMut => (
+                        Deep,
+                        Write(WriteKind::MutableBorrow(BorrowKind::SharedMut)),
+                    ),
                     Mutability::Mut => (
                         Deep,
                         Write(WriteKind::MutableBorrow(BorrowKind::Mut {
@@ -386,6 +391,12 @@ impl<'cx, 'tcx> InvalidationGenerator<'cx, 'tcx> {
                         // Reads don't invalidate shared or shallow borrows
                     }
 
+                    (Read(_), BorrowKind::SharedMut) => {
+                        // [snp] Reads don't invalidate shared mut borrows?
+                        // Is this remotely correct?
+                        println!("[snp] Is this good?");
+                    }
+
                     (Read(_), BorrowKind::Unique | BorrowKind::Mut { .. }) => {
                         // Reading from mere reservations of mutable-borrows is OK.
                         if !is_active(&this.dominators, borrow, location) {
@@ -429,6 +440,7 @@ impl<'cx, 'tcx> InvalidationGenerator<'cx, 'tcx> {
             assert!(match borrow.kind {
                 BorrowKind::Shared | BorrowKind::Shallow => false,
                 BorrowKind::Unique | BorrowKind::Mut { .. } => true,
+                BorrowKind::SharedMut => panic!("[snp] I don't know what to do"),
             });
 
             self.access_place(

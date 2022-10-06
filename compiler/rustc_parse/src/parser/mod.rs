@@ -1152,6 +1152,9 @@ impl<'a> Parser<'a> {
 
     /// Parses mutability (`mut` or nothing).
     fn parse_mutability(&mut self) -> Mutability {
+        if self.eat_keyword(kw::ShrMut) {
+            return Mutability::SharedMut;
+        }
         if self.eat_keyword(kw::Mut) { Mutability::Mut } else { Mutability::Not }
     }
 

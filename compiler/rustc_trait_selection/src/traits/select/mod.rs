@@ -1887,7 +1887,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Slice(..)
             | ty::Generator(_, _, hir::Movability::Static)
             | ty::Foreign(..)
-            | ty::Ref(_, _, hir::Mutability::Mut) => None,
+            | ty::Ref(_, _, hir::Mutability::Mut)
+            | ty::Ref(_, _, hir::Mutability::SharedMut) => None,
 
             ty::Tuple(tys) => {
                 // (*) binder moved here

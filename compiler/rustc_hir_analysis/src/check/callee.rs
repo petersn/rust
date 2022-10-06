@@ -261,6 +261,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             // overloaded function call ops.
                             allow_two_phase_borrow: AllowTwoPhase::No,
                         },
+                        hir::Mutability::SharedMut => AutoBorrowMutability::SharedMut,
                     };
                     autoref = Some(Adjustment {
                         kind: Adjust::Borrow(AutoBorrow::Ref(*region, mutbl)),

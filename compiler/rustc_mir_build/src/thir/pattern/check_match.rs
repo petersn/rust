@@ -1094,6 +1094,7 @@ fn check_borrow_conflicts_in_at_patterns(cx: &MatchVisitor<'_, '_, '_>, pat: &Pa
         let (primary, also) = match mut_outer {
             Mutability::Mut => ("mutable", "immutable"),
             Mutability::Not => ("immutable", "mutable"),
+            Mutability::SharedMut => ("[snp] whoops", "[snp] whoops"),
         };
         let msg =
             format!("cannot borrow value as {} because it is also borrowed as {}", also, primary);

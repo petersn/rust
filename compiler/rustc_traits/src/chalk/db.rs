@@ -416,18 +416,22 @@ impl<'tcx> chalk_solve::RustIrDatabase<RustInterner<'tcx>> for RustIrDatabase<'t
                 (&ty::Slice(..), Slice(..)) => true,
                 (&ty::RawPtr(type_and_mut), Raw(mutability, _)) => {
                     match (type_and_mut.mutbl, mutability) {
+                        (ast::Mutability::SharedMut, chalk_ir::Mutability::Mut) => true,
                         (ast::Mutability::Mut, chalk_ir::Mutability::Mut) => true,
                         (ast::Mutability::Mut, chalk_ir::Mutability::Not) => false,
                         (ast::Mutability::Not, chalk_ir::Mutability::Mut) => false,
                         (ast::Mutability::Not, chalk_ir::Mutability::Not) => true,
+                        _ => false, // [snp] I don't like this -- expand it out.
                     }
                 }
                 (&ty::Ref(.., mutability1), Ref(mutability2, ..)) => {
                     match (mutability1, mutability2) {
+                        (ast::Mutability::SharedMut, chalk_ir::Mutability::Mut) => true,
                         (ast::Mutability::Mut, chalk_ir::Mutability::Mut) => true,
                         (ast::Mutability::Mut, chalk_ir::Mutability::Not) => false,
                         (ast::Mutability::Not, chalk_ir::Mutability::Mut) => false,
                         (ast::Mutability::Not, chalk_ir::Mutability::Not) => true,
+                        _ => false, // [snp] I don't like this -- expand it out.
                     }
                 }
                 (&ty::Opaque(def_id, ..), OpaqueType(opaque_ty_id, ..)) => def_id == opaque_ty_id.0,

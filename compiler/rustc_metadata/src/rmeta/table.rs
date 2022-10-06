@@ -99,6 +99,7 @@ fixed_size_enum! {
         ( Generator                                )
         ( Static(ast::Mutability::Not)             )
         ( Static(ast::Mutability::Mut)             )
+        ( Static(ast::Mutability::SharedMut)       )
         ( Ctor(CtorOf::Struct, CtorKind::Fn)       )
         ( Ctor(CtorOf::Struct, CtorKind::Const)    )
         ( Ctor(CtorOf::Struct, CtorKind::Fictive)  )

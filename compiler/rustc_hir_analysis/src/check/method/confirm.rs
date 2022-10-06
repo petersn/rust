@@ -178,6 +178,7 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
                         // for two-phase borrows.
                         allow_two_phase_borrow: AllowTwoPhase::Yes,
                     },
+                    hir::Mutability::SharedMut => AutoBorrowMutability::SharedMut,
                 };
                 adjustments.push(Adjustment {
                     kind: Adjust::Borrow(AutoBorrow::Ref(region, mutbl)),

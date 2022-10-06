@@ -15,6 +15,12 @@ rustc_span = { path = "../rustc_span" }
 chalk-ir = "0.80.0"
 chalk-engine = "0.80.0"
 chalk-solve = "0.80.0"
+#chalk-ir = { path = "../../../chalk/chalk-ir" }
+#chalk-engine = { path = "../../../chalk/chalk-engine" }
+#chalk-solve = { path = "../../../chalk/chalk-solve" }
+#chalk-ir = { path = "../../../chalk" }
+#chalk-engine = { path = "../../../chalk" }
+#chalk-solve = { path = "../../../chalk" }
 smallvec = { version = "1.8.1", features = ["union", "may_dangle"] }
 rustc_infer = { path = "../rustc_infer" }
 rustc_trait_selection = { path = "../rustc_trait_selection" }

@@ -125,7 +125,8 @@ pub fn relate_type_and_mut<'tcx, R: TypeRelation<'tcx>>(
         let mutbl = a.mutbl;
         let (variance, info) = match mutbl {
             ast::Mutability::Not => (ty::Covariant, ty::VarianceDiagInfo::None),
-            ast::Mutability::Mut => {
+            // [snp] I think invariance is right here, and these should be treated identically?
+            ast::Mutability::Mut | ast::Mutability::SharedMut => {
                 (ty::Invariant, ty::VarianceDiagInfo::Invariant { ty: base_ty, param_index: 0 })
             }
         };

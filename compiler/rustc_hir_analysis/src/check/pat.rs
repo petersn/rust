@@ -356,6 +356,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 ty::BindByValue(_) |
                 // When `ref mut`, stay a `ref mut` (on `&mut`) or downgrade to `ref` (on `&`).
                 ty::BindByReference(hir::Mutability::Mut) => inner_mutability,
+                // [snp] I have no idea if this is right:
+                ty::BindByReference(hir::Mutability::SharedMut) => match inner_mutability {
+                    hir::Mutability::Mut => hir::Mutability::SharedMut,
+                    hir::Mutability::SharedMut => hir::Mutability::SharedMut,
+                    hir::Mutability::Not => hir::Mutability::Not,
+                },
                 // Once a `ref`, always a `ref`.
                 // This is because a `& &mut` cannot mutate the underlying value.
                 ty::BindByReference(m @ hir::Mutability::Not) => m,
@@ -690,6 +696,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
             let mutability = match mutbl {
                 ast::Mutability::Mut => "mut",
+                ast::Mutability::SharedMut => "shrmut",
                 ast::Mutability::Not => "",
             };
 

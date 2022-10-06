@@ -2217,6 +2217,7 @@ impl<'a> State<'a> {
     pub fn print_mutability(&mut self, mutbl: hir::Mutability, print_const: bool) {
         match mutbl {
             hir::Mutability::Mut => self.word_nbsp("mut"),
+            hir::Mutability::SharedMut => self.word_nbsp("shrmut"),
             hir::Mutability::Not => {
                 if print_const {
                     self.word_nbsp("const")

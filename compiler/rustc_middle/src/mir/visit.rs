@@ -647,6 +647,9 @@ macro_rules! make_mir_visitor {
                             ),
                             BorrowKind::Mut { .. } =>
                                 PlaceContext::MutatingUse(MutatingUseContext::Borrow),
+                            BorrowKind::SharedMut => PlaceContext::MutatingUse(
+                                MutatingUseContext::Borrow // [snp] Do I need MutatingUseContext::SharedBorrow?
+                            ),
                         };
                         self.visit_place(path, ctx, location);
                     }
@@ -661,6 +664,10 @@ macro_rules! make_mir_visitor {
                     Rvalue::AddressOf(m, path) => {
                         let ctx = match m {
                             Mutability::Mut => PlaceContext::MutatingUse(
+                                MutatingUseContext::AddressOf
+                            ),
+                            // [snp] Is this right?
+                            Mutability::SharedMut => PlaceContext::MutatingUse(
                                 MutatingUseContext::AddressOf
                             ),
                             Mutability::Not => PlaceContext::NonMutatingUse(

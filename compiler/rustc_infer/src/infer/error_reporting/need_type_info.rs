@@ -508,6 +508,7 @@ impl<'a, 'tcx> InferCtxt<'a, 'tcx> {
                         ..,
                         Adjustment { kind: Adjust::Borrow(AutoBorrow::Ref(_, mut_)), target: _ },
                     ] => match mut_ {
+                        AutoBorrowMutability::SharedMut => "&shrmut ",
                         AutoBorrowMutability::Mut { .. } => "&mut ",
                         AutoBorrowMutability::Not => "&",
                     },

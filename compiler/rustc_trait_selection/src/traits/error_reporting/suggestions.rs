@@ -1241,7 +1241,8 @@ impl<'a, 'tcx> InferCtxtExt<'tcx> for InferCtxt<'a, 'tcx> {
             if let ty::Ref(region, t_type, mutability) = *trait_pred.skip_binder().self_ty().kind()
             {
                 let suggested_ty = match mutability {
-                    hir::Mutability::Mut => self.tcx.mk_imm_ref(region, t_type),
+                    // [snp] Should this functionality be shared?
+                    hir::Mutability::Mut | hir::Mutability::SharedMut => self.tcx.mk_imm_ref(region, t_type),
                     hir::Mutability::Not => self.tcx.mk_mut_ref(region, t_type),
                 };
 

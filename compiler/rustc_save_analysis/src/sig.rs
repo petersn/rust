@@ -159,6 +159,7 @@ impl<'hir> Sig for hir::Ty<'hir> {
             hir::TyKind::Ptr(ref mt) => {
                 let prefix = match mt.mutbl {
                     hir::Mutability::Mut => "*mut ",
+                    hir::Mutability::SharedMut => "*mut ",
                     hir::Mutability::Not => "*const ",
                 };
                 let nested = mt.ty.make(offset + prefix.len(), id, scx)?;

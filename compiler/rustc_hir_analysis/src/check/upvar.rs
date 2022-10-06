@@ -2078,7 +2078,7 @@ fn migration_suggestion_for_2229(
 /// ```rust,no_run
 /// struct Point { x: i32, y: i32 }
 /// let mut p = Point { x: 10, y: 10 };
-///
+/// 
 /// let c = || {
 ///     p.x     += 10;
 /// // ^ E1 ^
@@ -2114,12 +2114,16 @@ fn determine_capture_info(
         }
     } else {
         // We select the CaptureKind which ranks higher based the following priority order:
-        // ByValue > MutBorrow > UniqueImmBorrow > ImmBorrow
+        // ByValue > MutBorrow > UniqueImmBorrow > SharedMutBorrow > ImmBorrow
         match (capture_info_a.capture_kind, capture_info_b.capture_kind) {
             (ty::UpvarCapture::ByValue, _) => capture_info_a,
             (_, ty::UpvarCapture::ByValue) => capture_info_b,
             (ty::UpvarCapture::ByRef(ref_a), ty::UpvarCapture::ByRef(ref_b)) => {
                 match (ref_a, ref_b) {
+                    // Some new rules for SharedMutBorrow.
+                    (ty::BorrowKind::SharedMutBorrow, _) => panic!("[snp] Not sure what to do here 3"),
+                    (_, ty::BorrowKind::SharedMutBorrow) => panic!("[snp] Not sure what to do here 4"),
+
                     // Take LHS:
                     (ty::UniqueImmBorrow | ty::MutBorrow, ty::ImmBorrow)
                     | (ty::MutBorrow, ty::UniqueImmBorrow) => capture_info_a,

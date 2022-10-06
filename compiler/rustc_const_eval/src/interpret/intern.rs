@@ -289,7 +289,8 @@ impl<'rt, 'mir, 'tcx: 'mir, M: CompileTimeMachine<'mir, 'tcx, const_eval::Memory
                                 // allocation.
                                 InternMode::Static(Mutability::Not)
                             }
-                            Mutability::Mut => {
+                            // [snp] Should this be shared?
+                            Mutability::Mut | Mutability::SharedMut => {
                                 // Mutable reference.
                                 InternMode::Static(mutbl)
                             }

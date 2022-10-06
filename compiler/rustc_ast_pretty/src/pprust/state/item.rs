@@ -78,6 +78,7 @@ impl<'a> State<'a> {
             None => "const",
             Some(ast::Mutability::Not) => "static",
             Some(ast::Mutability::Mut) => "static mut",
+            Some(ast::Mutability::SharedMut) => "static shrmut",
         };
         self.word_space(leading);
         self.print_ident(ident);

@@ -264,7 +264,8 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                                 self.requires_unsafe(pat.span, BorrowOfLayoutConstrainedField);
                             }
                         }
-                        BorrowKind::Mut { .. } => {
+                        // [snp] Should this behavior be shared?
+                        BorrowKind::SharedMut | BorrowKind::Mut { .. } => {
                             self.requires_unsafe(pat.span, MutationOfLayoutConstrainedField);
                         }
                     }
@@ -463,7 +464,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                         {
                             self.requires_unsafe(expr.span, BorrowOfLayoutConstrainedField)
                         }
-                        BorrowKind::Mut { .. } => {
+                        BorrowKind::SharedMut | BorrowKind::Mut { .. } => {
                             self.requires_unsafe(expr.span, MutationOfLayoutConstrainedField)
                         }
                         BorrowKind::Shallow | BorrowKind::Shared | BorrowKind::Unique => {}

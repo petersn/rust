@@ -553,5 +553,6 @@ fn arms_contain_ref_bindings<'tcx>(arms: &'tcx [hir::Arm<'tcx>]) -> Option<hir::
     arms.iter().filter_map(|a| a.pat.contains_explicit_ref_binding()).max_by_key(|m| match *m {
         hir::Mutability::Mut => 1,
         hir::Mutability::Not => 0,
+        hir::Mutability::SharedMut => panic!("[snp] I'm not sure what to do here!"),
     })
 }

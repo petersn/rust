@@ -275,6 +275,9 @@ impl<'a, 'tcx> PatCtxt<'a, 'tcx> {
                     .expect("missing binding mode");
                 let (mutability, mode) = match bm {
                     ty::BindByValue(mutbl) => (mutbl, BindingMode::ByValue),
+                    ty::BindByReference(hir::Mutability::SharedMut) => (
+                        Mutability::SharedMut, BindingMode::ByRef(BorrowKind::SharedMut),
+                    ),
                     ty::BindByReference(hir::Mutability::Mut) => (
                         Mutability::Not,
                         BindingMode::ByRef(BorrowKind::Mut { allow_two_phase_borrow: false }),

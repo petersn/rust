@@ -136,12 +136,14 @@ fn push_debuginfo_type_name<'tcx>(
                 match mutbl {
                     Mutability::Not => output.push_str("ptr_const$<"),
                     Mutability::Mut => output.push_str("ptr_mut$<"),
+                    Mutability::SharedMut => output.push_str("ptr_shrmut$<"),
                 }
             } else {
                 output.push('*');
                 match mutbl {
                     Mutability::Not => output.push_str("const "),
                     Mutability::Mut => output.push_str("mut "),
+                    Mutability::SharedMut => output.push_str("shrmut "),
                 }
             }
 
@@ -165,6 +167,7 @@ fn push_debuginfo_type_name<'tcx>(
                 match mutbl {
                     Mutability::Not => output.push_str("ref$<"),
                     Mutability::Mut => output.push_str("ref_mut$<"),
+                    Mutability::SharedMut => output.push_str("ref_shrmut$<"),
                 }
             }
 

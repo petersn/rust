@@ -403,6 +403,7 @@ impl<'tcx> Printer<'tcx> for &mut SymbolMangler<'tcx> {
                 self.push(match mutbl {
                     hir::Mutability::Not => "R",
                     hir::Mutability::Mut => "Q",
+                    hir::Mutability::SharedMut => "W",
                 });
                 if !r.is_erased() {
                     self = r.print(self)?;
@@ -414,6 +415,7 @@ impl<'tcx> Printer<'tcx> for &mut SymbolMangler<'tcx> {
                 self.push(match mt.mutbl {
                     hir::Mutability::Not => "P",
                     hir::Mutability::Mut => "O",
+                    hir::Mutability::SharedMut => "V",
                 });
                 self = mt.ty.print(self)?;
             }
@@ -618,6 +620,7 @@ impl<'tcx> Printer<'tcx> for &mut SymbolMangler<'tcx> {
                 self.push(match mutbl {
                     hir::Mutability::Not => "R",
                     hir::Mutability::Mut => "Q",
+                    hir::Mutability::SharedMut => "W",
                 });
 
                 match inner_ty.kind() {

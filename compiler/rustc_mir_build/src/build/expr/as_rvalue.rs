@@ -656,6 +656,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         let borrow_kind = match mutability {
             Mutability::Not => BorrowKind::Unique,
             Mutability::Mut => BorrowKind::Mut { allow_two_phase_borrow: false },
+            Mutability::SharedMut => BorrowKind::SharedMut,
         };
 
         let arg_place = arg_place_builder.into_place(this);

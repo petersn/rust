@@ -108,10 +108,17 @@ fn coerce_mutbls<'tcx>(
     from_mutbl: hir::Mutability,
     to_mutbl: hir::Mutability,
 ) -> RelateResult<'tcx, ()> {
+    // [snp] This is an important moment! I must get this right.
     match (from_mutbl, to_mutbl) {
         (hir::Mutability::Mut, hir::Mutability::Mut | hir::Mutability::Not)
         | (hir::Mutability::Not, hir::Mutability::Not) => Ok(()),
         (hir::Mutability::Not, hir::Mutability::Mut) => Err(TypeError::Mutability),
+
+        (hir::Mutability::Mut, hir::Mutability::SharedMut) => Ok(()),
+        (hir::Mutability::SharedMut, hir::Mutability::SharedMut) => Ok(()),
+        (hir::Mutability::SharedMut, hir::Mutability::Mut) => Err(TypeError::Mutability),
+        (hir::Mutability::SharedMut, hir::Mutability::Not) => Ok(()),
+        (hir::Mutability::Not, hir::Mutability::SharedMut) => Err(TypeError::Mutability),
     }
 }
 
@@ -484,6 +491,7 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
             hir::Mutability::Mut => {
                 AutoBorrowMutability::Mut { allow_two_phase_borrow: self.allow_two_phase }
             }
+            hir::Mutability::SharedMut => AutoBorrowMutability::SharedMut,
         };
         adjustments.push(Adjustment {
             kind: Adjust::Borrow(AutoBorrow::Ref(*r_borrow, mutbl)),
@@ -561,6 +569,7 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
                         // the reborrow in coerce_borrowed_ptr will pick it up.
                         allow_two_phase_borrow: AllowTwoPhase::No,
                     },
+                    hir::Mutability::SharedMut => AutoBorrowMutability::SharedMut,
                 };
                 Some((
                     Adjustment { kind: Adjust::Deref(None), target: ty_a },

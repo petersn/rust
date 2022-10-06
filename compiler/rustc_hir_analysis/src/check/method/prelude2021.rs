@@ -94,6 +94,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                             ..
                         }) => "&mut ",
                         Some(probe::AutorefOrPtrAdjustment::Autoref {
+                            mutbl: Mutability::SharedMut,
+                            ..
+                        }) => "&shrmut ",
+                        Some(probe::AutorefOrPtrAdjustment::Autoref {
                             mutbl: Mutability::Not,
                             ..
                         }) => "&",
@@ -389,6 +393,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         let autoref = match pick.autoref_or_ptr_adjustment {
             Some(probe::AutorefOrPtrAdjustment::Autoref { mutbl: Mutability::Mut, .. }) => "&mut ",
+            Some(probe::AutorefOrPtrAdjustment::Autoref { mutbl: Mutability::SharedMut, .. }) => "&shrmut ",
             Some(probe::AutorefOrPtrAdjustment::Autoref { mutbl: Mutability::Not, .. }) => "&",
             Some(probe::AutorefOrPtrAdjustment::ToConstPtr) | None => "",
         };

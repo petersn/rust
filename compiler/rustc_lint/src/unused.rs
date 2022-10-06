@@ -1201,6 +1201,9 @@ impl<'tcx> LateLintPass<'tcx> for UnusedAllocation {
                         adjustment::AutoBorrowMutability::Mut { .. } => {
                             fluent::lint::unused_allocation_mut
                         }
+                        adjustment::AutoBorrowMutability::SharedMut => {
+                            fluent::lint::unused_allocation_mut
+                        }
                     },
                     |lint| lint,
                 );

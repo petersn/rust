@@ -1266,6 +1266,7 @@ impl<'a> Parser<'a> {
         // that typeck will later enrich the error with a type.
         let kind = match m {
             Some(Mutability::Mut) => "static mut",
+            Some(Mutability::SharedMut) => "static shrmut",
             Some(Mutability::Not) => "static",
             None => "const",
         };

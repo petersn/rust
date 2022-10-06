@@ -1058,6 +1058,7 @@ impl<'tcx> Cx<'tcx> {
                     ty::BorrowKind::ImmBorrow => BorrowKind::Shared,
                     ty::BorrowKind::UniqueImmBorrow => BorrowKind::Unique,
                     ty::BorrowKind::MutBorrow => BorrowKind::Mut { allow_two_phase_borrow: false },
+                    ty::BorrowKind::SharedMutBorrow => BorrowKind::SharedMut,
                 };
                 Expr {
                     temp_lifetime,
@@ -1092,6 +1093,7 @@ impl ToBorrowKind for AutoBorrowMutability {
     fn to_borrow_kind(&self) -> BorrowKind {
         use rustc_middle::ty::adjustment::AllowTwoPhase;
         match *self {
+            AutoBorrowMutability::SharedMut => BorrowKind::SharedMut,
             AutoBorrowMutability::Mut { allow_two_phase_borrow } => BorrowKind::Mut {
                 allow_two_phase_borrow: match allow_two_phase_borrow {
                     AllowTwoPhase::Yes => true,
@@ -1106,6 +1108,7 @@ impl ToBorrowKind for AutoBorrowMutability {
 impl ToBorrowKind for hir::Mutability {
     fn to_borrow_kind(&self) -> BorrowKind {
         match *self {
+            hir::Mutability::SharedMut => BorrowKind::SharedMut,
             hir::Mutability::Mut => BorrowKind::Mut { allow_two_phase_borrow: false },
             hir::Mutability::Not => BorrowKind::Shared,
         }

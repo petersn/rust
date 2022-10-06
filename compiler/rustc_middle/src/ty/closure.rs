@@ -422,11 +422,15 @@ pub enum BorrowKind {
 
     /// Data is mutable and not aliasable.
     MutBorrow,
+
+    /// Data is mutable and aliasable.
+    SharedMutBorrow,
 }
 
 impl BorrowKind {
     pub fn from_mutbl(m: hir::Mutability) -> BorrowKind {
         match m {
+            hir::Mutability::SharedMut => SharedMutBorrow,
             hir::Mutability::Mut => MutBorrow,
             hir::Mutability::Not => ImmBorrow,
         }
@@ -438,6 +442,7 @@ impl BorrowKind {
     /// question.
     pub fn to_mutbl_lossy(self) -> hir::Mutability {
         match self {
+            SharedMutBorrow => hir::Mutability::SharedMut,
             MutBorrow => hir::Mutability::Mut,
             ImmBorrow => hir::Mutability::Not,
 

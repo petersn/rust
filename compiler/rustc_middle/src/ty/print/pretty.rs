@@ -569,6 +569,7 @@ pub trait PrettyPrinter<'tcx>:
                     "*{} ",
                     match tm.mutbl {
                         hir::Mutability::Mut => "mut",
+                        hir::Mutability::SharedMut => "shrmut",
                         hir::Mutability::Not => "const",
                     }
                 ));

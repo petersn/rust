@@ -2484,6 +2484,11 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     #[inline]
+    pub fn mk_shrmut_ref(self, r: Region<'tcx>, ty: Ty<'tcx>) -> Ty<'tcx> {
+        self.mk_ref(r, TypeAndMut { ty, mutbl: hir::Mutability::SharedMut })
+    }
+
+    #[inline]
     pub fn mk_mut_ref(self, r: Region<'tcx>, ty: Ty<'tcx>) -> Ty<'tcx> {
         self.mk_ref(r, TypeAndMut { ty, mutbl: hir::Mutability::Mut })
     }

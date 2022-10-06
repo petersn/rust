@@ -1526,6 +1526,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         Some(Mutability::Mut) => {
                             (".borrow_mut()", "mutably borrow", "any borrows exist")
                         }
+                        Some(Mutability::SharedMut) => {
+                            ("[snp] hmm 1", "[snp] hmm 2", "[snp] hmm 3")
+                        }
                         None => return,
                     };
                     err.span_suggestion_verbose(
@@ -1551,6 +1554,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     let (suggestion, borrow_kind) = match mutable {
                         Some(Mutability::Not) => (".read().unwrap()", "borrow"),
                         Some(Mutability::Mut) => (".write().unwrap()", "mutably borrow"),
+                        Some(Mutability::SharedMut) => ("[snp] hmm 4", "[snp] hmm 5"),
                         None => return,
                     };
                     err.span_suggestion_verbose(

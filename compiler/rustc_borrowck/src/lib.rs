@@ -1025,7 +1025,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     Control::Continue
                 }
 
-                (Read(_), BorrowKind::Shared | BorrowKind::Shallow)
+                (Read(_), BorrowKind::Shared | BorrowKind::Shallow | BorrowKind::SharedMut)
                 | (
                     Read(ReadKind::Borrow(BorrowKind::Shallow)),
                     BorrowKind::Unique | BorrowKind::Mut { .. },
@@ -1159,7 +1159,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     BorrowKind::Shallow => {
                         (Shallow(Some(ArtificialField::ShallowBorrow)), Read(ReadKind::Borrow(bk)))
                     }
-                    BorrowKind::Shared => (Deep, Read(ReadKind::Borrow(bk))),
+                    BorrowKind::Shared | BorrowKind::SharedMut => (Deep, Read(ReadKind::Borrow(bk))),
                     BorrowKind::Unique | BorrowKind::Mut { .. } => {
                         let wk = WriteKind::MutableBorrow(bk);
                         if allow_two_phase_borrow(bk) {
@@ -1200,6 +1200,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                             allow_two_phase_borrow: false,
                         })),
                     ),
+                    Mutability::SharedMut => (Deep, Read(ReadKind::Borrow(BorrowKind::SharedMut))),
                     Mutability::Not => (Deep, Read(ReadKind::Borrow(BorrowKind::Shared))),
                 };
 
@@ -1530,6 +1531,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             assert!(match borrow.kind {
                 BorrowKind::Shared | BorrowKind::Shallow => false,
                 BorrowKind::Unique | BorrowKind::Mut { .. } => true,
+                BorrowKind::SharedMut => panic!("[snp] I have no idea what to do here 2"),
             });
 
             self.access_place(
@@ -1942,14 +1944,15 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
         match kind {
             Reservation(WriteKind::MutableBorrow(
-                borrow_kind @ (BorrowKind::Unique | BorrowKind::Mut { .. }),
+                borrow_kind @ (BorrowKind::Unique | BorrowKind::Mut { .. } | BorrowKind::SharedMut),
             ))
             | Write(WriteKind::MutableBorrow(
-                borrow_kind @ (BorrowKind::Unique | BorrowKind::Mut { .. }),
+                borrow_kind @ (BorrowKind::Unique | BorrowKind::Mut { .. } | BorrowKind::SharedMut),
             )) => {
                 let is_local_mutation_allowed = match borrow_kind {
                     BorrowKind::Unique => LocalMutationIsAllowed::Yes,
                     BorrowKind::Mut { .. } => is_local_mutation_allowed,
+                    BorrowKind::SharedMut => is_local_mutation_allowed,
                     BorrowKind::Shared | BorrowKind::Shallow => unreachable!(),
                 };
                 match self.is_mutable(place.as_ref(), is_local_mutation_allowed) {
@@ -2015,7 +2018,8 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     BorrowKind::Unique
                     | BorrowKind::Mut { .. }
                     | BorrowKind::Shared
-                    | BorrowKind::Shallow,
+                    | BorrowKind::Shallow
+                    | BorrowKind::SharedMut,
                 )
                 | ReadKind::Copy,
             ) => {
@@ -2113,7 +2117,8 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         }),
                         LocalMutationIsAllowed::No => Err(place),
                     },
-                    Mutability::Mut => Ok(RootPlace {
+                    Mutability::SharedMut
+                    | Mutability::Mut => Ok(RootPlace {
                         place_local: place.local,
                         place_projection: place.projection,
                         is_local_mutation_allowed,
@@ -2143,6 +2148,10 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
                                         self.is_mutable(place_base, mode)
                                     }
+                                    // Shared mutably borrowed data is always mutable
+                                    hir::Mutability::SharedMut => {
+                                        self.is_mutable(place_base, is_local_mutation_allowed)
+                                    }
                                 }
                             }
                             ty::RawPtr(tnm) => {
@@ -2151,7 +2160,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                                     hir::Mutability::Not => Err(place),
                                     // `*mut` raw pointers are always mutable, regardless of
                                     // context. The users have to check by themselves.
-                                    hir::Mutability::Mut => Ok(RootPlace {
+                                    hir::Mutability::SharedMut | hir::Mutability::Mut => Ok(RootPlace {
                                         place_local: place.local,
                                         place_projection: place.projection,
                                         is_local_mutation_allowed,
@@ -2189,6 +2198,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                                     | LocalMutationIsAllowed::ExceptUpvars,
                                 ) => Err(place),
                                 (Mutability::Not, LocalMutationIsAllowed::Yes)
+                                | (Mutability::SharedMut, _) // [snp] I have no idea if this is right.
                                 | (Mutability::Mut, _) => {
                                     // Subtle: this is an upvar
                                     // reference, so it looks like

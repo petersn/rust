@@ -470,6 +470,8 @@ impl<'tcx> Validator<'_, 'tcx> {
                 }
             }
 
+            BorrowKind::SharedMut => panic!("[snp] I'm not sure what to do here yet"),
+
             BorrowKind::Mut { .. } => {
                 let ty = place.ty(self.body, self.tcx).ty;
 
